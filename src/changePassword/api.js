@@ -6,7 +6,7 @@ export const data = {
     "txFlow": "changePassword"
 };
 
-var config = (url, payload) => ({
+var config = (url, headers, payload) => ({
   method: "post",
   url: `http://localhost:5080/${url}`,
   headers: {
@@ -24,7 +24,7 @@ var config = (url, payload) => ({
     "x-ibm-client-secret": "",
     "x-global-transaction-id": "94a2fda3-64d4-4613-b3b7-f97fa79f40e8",
     "x-member-id": "T01",
-    "x-tx-channel": "mob",
+    ...headers
   },
   data: payload ? payload : data,
 });
@@ -60,39 +60,46 @@ var config = (url, payload) => ({
 //   }
 
 export async function initiateTx() {
-  const response = await axios(config('v1/eid/identity/tx'))
+  const response = await axios(config('v1/eid/identity/tx', {"x-tx-channel": "mob"}))
     .then(function (response) {
       console.log(JSON.stringify(response.data));
       return response
     })
     .catch(function (error) {
       console.log(error);
+      return error
     });
 
     return response
 }
 
 export async function validateOtp(payload) {
-    const response = await axios(config('v1/eid/identity/tx/validate', payload))
+    const response = await axios(config('v1/eid/identity/tx/validate',{}, payload))
     .then(function (response) {
       console.log(JSON.stringify(response.data));
       return response.data
     })
     .catch(function (error) {
       console.log(error);
+      return error
     });
 
     return response
 }
 
 export async function changePassword(payload) {
-    const response = await axios(config('v1/eid/identity/change-password', payload))
+    const response = await axios(config('v1/eid/identity/change-password', {}, payload))
     .then(function (response) {
       console.log(JSON.stringify(response.data));
       return response.data
     })
     .catch(function (error) {
       console.log(error);
+      if(error) {
+        return {
+          actions: ['deleteProxyKeyError']
+        }
+      }
     });
 
     return response

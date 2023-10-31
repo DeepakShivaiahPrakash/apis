@@ -1,11 +1,9 @@
-import './App.css';
-
 import * as React from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import {initiateTx, validateOtp, changePassword, data} from './calls';
+import {initiateTx, validateOtp, changePassword, data} from './api';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -38,12 +36,13 @@ function a11yProps(index) {
 
 
 
-function App() {
+function ChangePasswordScenario() {
   const [value, setValue] = React.useState(0);
   const [flowId, setFlowId] = React.useState(0);
   const [otpValue, setOtpValue] = React.useState()
   const [password, setPassword] = React.useState('!Confirm1234u')
   const [response, setResponse] = React.useState({})
+  const [pinStatus, setPinStatus] = React.useState(12);
 
   const validateOtpPayload = (flowId, otp) => ({
     "flowId": flowId,
@@ -84,14 +83,25 @@ const changePasswordPayload = (flowId, password) => ({
 
   const handleChangePassword = async () => {
     const response = await changePassword(changePasswordPayload(flowId, password))
+    console.log('responsehandleChangePassword>>>>', response)
+    if(!response?.actions?.includes("deleteProxyKeyError")){
+      setPinStatus(15)
+    } else {
+      setPinStatus(12)
+    }
     setResponse(response)
   }
 
 
   return (
+    <>
+    <h1 style={{"textAlign": 'center'}}>Change Password and Delete Proxy Key Scenario</h1>
+    <hr></hr>
+    <br/>
     <Box
       sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height: 224 }}
     >
+      
       <Tabs
         orientation="vertical"
         variant="scrollable"
@@ -109,8 +119,8 @@ const changePasswordPayload = (flowId, password) => ({
         <pre className="prettyprint lang-html" style={{ background: 'grey', color: 'white', padding: '20px'}}>{JSON.stringify(data, null, 4)}</pre>
         <button type="submit" onClick={handleInitiateTx}>Initiate tx</button>
         <br/><br/>
-        <strong>Response</strong>
-        <pre className="prettyprint lang-html" style={{ background: 'grey', color: 'white', padding: '20px'}}>{JSON.stringify(response, null, 4)}</pre>
+        <strong>Response (PINSTATUS: { pinStatus}) </strong>
+        <pre className="prettyprint lang-html" style={{ background: 'grey', color: 'white', padding: '20px', width: '800px'}}>{JSON.stringify(response, null, 4)}</pre>
       </TabPanel>
 
 
@@ -121,8 +131,8 @@ const changePasswordPayload = (flowId, password) => ({
         <pre className="prettyprint lang-html" style={{ background: 'grey', color: 'white', padding: '20px'}}>{JSON.stringify(validateOtpPayload(flowId, otpValue), null, 4)}</pre>
         <button type="submit" onClick={handleValidateOtp} value={otpValue}>Validate OTP</button>
         <br/><br/>
-        <strong>Response</strong>
-        <pre className="prettyprint lang-html" style={{ background: 'grey', color: 'white', padding: '20px'}}>{JSON.stringify(response, null, 4)}</pre>
+        <strong>Response: (PINSTATUS: { pinStatus})</strong>
+        <pre className="prettyprint lang-html" style={{ background: 'grey', color: 'white', padding: '20px', width: '800px' }}>{JSON.stringify(response, null, 4)}</pre>
       </TabPanel>
 
 
@@ -133,11 +143,12 @@ const changePasswordPayload = (flowId, password) => ({
         <pre className="prettyprint lang-html" style={{ background: 'grey', color: 'white', padding: '20px'}}>{JSON.stringify(changePasswordPayload(flowId, password), null, 4)}</pre>
         <button type="submit" onClick={handleChangePassword} value={otpValue}>Confirm password</button>
         <br/><br/>
-        <strong>Response</strong>
-        <pre className="prettyprint lang-html" style={{ background: 'grey', color: 'white', padding: '20px'}}>{JSON.stringify(response, null, 4)}</pre>
+        <strong>Response: (PINSTATUS: { pinStatus})</strong>
+        <pre className="prettyprint lang-html" style={{ background: 'grey', color: 'white', padding: '20px', width: '800px'}}>{JSON.stringify(response, null, 4)}</pre>
       </TabPanel>
     </Box>
+    </>
   );
 }
 
-export default App;
+export default ChangePasswordScenario;
